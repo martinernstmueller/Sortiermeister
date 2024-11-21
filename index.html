@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
+  <head>
     <title>Sortiermeister</title>
     <script defer src="script/index.js"></script>
-    <link rel="stylesheet" href="style/style.css">
-</head>
-<body>
-    <h1>Sortiermeister</h1>
-    <h2>Bist du schneller als ein Computer?</h2>
-    <p>Sortiere die Zahlen in der richtigen Reihenfolge.</p>
-    <br>
-    <div class="sorting">
+    <link rel="stylesheet" href="style/style.css" />
+  </head>
+  <body>
+    <div class="containers" id="popUpContainer">
+      <div class="popups win-popup" id="winPopup">DU HAST GEWONNEN</div>
+      <div class="popups lose-popup" id="losePopup">DU HAST VERLOREN</div>
+      <div id="closeButton" onclick="tryAgain()">Close</div>
+    </div>
+    
+    <div class="overlay" id="overlay1"></div>
+    <div class="containers flex-container" id="buttonContainer">
+      <h3 class="difficulty-title">Wähle eine Schwierigkeit aus:</h3>
+      <button class="flex-items" id="easy-button" onclick="setSortSpeed(2000)">Easy</button>
+      <button class="flex-items" id="medium-button" onclick="setSortSpeed(1000)">Medium</button>
+      <button class="flex-items" id="hard-button" onclick="setSortSpeed(650)">Hard</button>
+    </div>
+    <div class="sorting-container">
+      <h1>Sortiermeister</h1>
+      <h2>Bist du schneller als ein Computer?</h2>
+      <p>Sortiere die Zahlen in der richtigen Reihenfolge.</p>
+      <br />
+      <div class="sorting">
         <div class="computer"></div>
         <div class="human"></div>
+      </div>
     </div>
-    <button onclick="startSort()">Start</button>
-</body>
+  </body>
 </html>

@@ -1,8 +1,33 @@
 const computer = document.getElementsByClassName('computer')[0];
 const human = document.getElementsByClassName('human')[0];
 
-let nums = []
+const checkWinner = (boxes, player) => {
+    const winContainer = document.getElementById('popUpContainer');
+    const winPopup = document.getElementById('winPopup');
+    const losePopup = document.getElementById('losePopup');
+    for (let i = 1; i < boxes.length; i++) {
+        let previousBox = parseInt(boxes[i - 1].children[0].innerHTML);
+        let currentBox = parseInt(boxes[i].children[0].innerHTML);
+        if (previousBox > currentBox) {
+            return false;
+        }
+    }
+    if (player == "Computer") {
+        winContainer.style.display = "block";
+        losePopup.style.display = "block";
+    } else if (player == "Spieler") {
+        winContainer.style.display = "block";
+        winPopup.style.display = "block";
+    }
+    return true;
+};
 
+const tryAgain = () => {
+    location.reload();
+}
+
+let nums = []
+let speed = 3000;
 const getColor = (num) => {
     const colors = [
         '#FF0000',
@@ -17,6 +42,16 @@ const getColor = (num) => {
         '#9c7aa4'
     ]
     return colors[nums.indexOf(num)]
+}
+
+
+const popup = document.getElementById('buttonContainer')
+const overlay = document.getElementById('overlay1')
+let setSortSpeed = (sortSpeed) => {
+    speed = sortSpeed
+    popup.style.display = 'none';
+    overlay.style.display = 'none';
+    startSort();
 }
 
 const createDiv = () => {
@@ -62,6 +97,10 @@ const startSort = () => {
                     activeBox.style.backgroundColor = getColor(parseInt(temp));
                     activeBox.classList.remove('active');
                     touch = null;
+                    if (checkWinner(playerBoxes, "Spieler")) {
+
+                        return true;
+                    }
                 } else {
                     touch = null;
                     box.classList.remove("active")
@@ -69,6 +108,7 @@ const startSort = () => {
             }
         })
     })
+
     let i = 1;
     let j = 0;
     let sortStage = () => {
@@ -80,7 +120,7 @@ const startSort = () => {
                     computerBoxes[j].style.backgroundColor = getColor(parseInt(temp));
                     computerBoxes[i].children.item(0).innerHTML = computerBoxes[j].children.item(0).innerHTML;
                     computerBoxes[j].children.item(0).innerHTML = temp;
-                    setTimeout(sortStage, 1000);
+                    setTimeout(sortStage, speed);
                     j++
                     return
                 }
@@ -90,6 +130,8 @@ const startSort = () => {
                 i++;
             }
             sortStage()
+        } else {
+            checkWinner(computerBoxes, "Computer");
         }
     };
     sortStage()
