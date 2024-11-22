@@ -63,9 +63,9 @@ const createDiv = () => {
     const div = document.createElement('div');
     const span = document.createElement('span');
     div.classList.add('box');
-    let num = Math.floor(Math.random() * 1 + 50);
+    let num = Math.floor(Math.random() * 49) + 1;
     while (nums.includes(num)) {
-        num = Math.floor(Math.random() * 1 + 50);
+        num = Math.floor(Math.random() * 49) + 1;
     }
     nums.push(num);
     div.style.backgroundColor = getColor(num);
