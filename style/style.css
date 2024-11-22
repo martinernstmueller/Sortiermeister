@@ -87,9 +87,10 @@ h2 {
 }
 
 .popups {
-    font-size: 50px;
+    font-size: 40px;
     position: relative;
     top: 30px;
+    left: 55px;
 }
 
 .win-popup {
@@ -100,10 +101,14 @@ h2 {
     display: none;
 }
 
+.draw-popup {
+    display: none;
+}
+
 #closeButton {
     position: absolute;
     top: 50%;
-    left: 40%;
+    left: 35%;
     box-shadow: inset 0px 1px 0px 0px #ffffff;
     background: linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
     background-color: #f9f9f9;
@@ -127,7 +132,7 @@ h2 {
 #closeButton:active {
     position: absolute;
     top: 50%;
-    left: 40%;
+    left: 35%;
 }
 
 
