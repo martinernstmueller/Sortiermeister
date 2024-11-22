@@ -69,6 +69,7 @@ const createDiv = () => {
     }
     nums.push(num);
     div.style.backgroundColor = getColor(num);
+    div.style.borderRadius = "10px";
     span.innerHTML = num.toString();
     div.appendChild(span);
     return div;
