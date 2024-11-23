@@ -1,11 +1,11 @@
 @font-face {
     font-family: Font-Add;
-    src: url('/style/fonts/Supercell-Magic\ Regular.ttf');
+    src: url('./fonts/Supercell-Magic Regular.ttf');
 }
 
 @font-face {
     font-family: Font-Superhard;
-    src: url('/style/fonts/pieces\ nfi.ttf');
+    src: url('./fonts/pieces nfi.ttf');
 }
 
 
@@ -250,8 +250,8 @@ h2 {
     border-color: rgb(204, 133, 0);
 }
 
-#superhard-button{
-    transform:translatex(240px) translatey(0px);
+#superhard-button {
+    transform: translatex(240px) translatey(0px);
     font-family: Font-Superhard;
     color: red;
     background-color: rgb(79, 0, 0);
