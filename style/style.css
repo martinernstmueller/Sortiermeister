@@ -42,9 +42,9 @@ h2 {
 
 
 .sorting-container {
-    width: 1200px;
+    width: fit-content;
     position: absolute;
-    top: 300px;
+    top: 250px;
     left: 150px;
     border-radius: 10px;
 }
@@ -56,16 +56,19 @@ h2 {
     font-weight: bold;
     padding: 5px;
     border-radius: 10px;
+    width: 100%;
 }
 
 .sorting .computer,
 .human {
-    width: 100%;
+    font-size: 100%;
+    width: fit-content;
     display: grid;
-    grid-template-columns: repeat(10, 100px);
+    grid-template-columns: repeat(11, 100px);
     grid-gap: 10px;
     padding: 10px;
     justify-content: center;
+    align-items: center;
     border-radius: 10px;
 }
 
