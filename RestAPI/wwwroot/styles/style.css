@@ -1,11 +1,11 @@
 @font-face {
     font-family: Font-Add;
-    src: url('/style/fonts/Supercell-Magic\ Regular.ttf');
+    src: url('/styles/fonts/Supercell-Magic\ Regular.ttf');
 }
 
 @font-face {
     font-family: Font-Superhard;
-    src: url('/style/fonts/pieces\ nfi.ttf');
+    src: url('/styles/fonts/pieces\ nfi.ttf');
 }
 
 
