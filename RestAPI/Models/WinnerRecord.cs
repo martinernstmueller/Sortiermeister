@@ -2,7 +2,7 @@
 {
     public class WinnerRecord
     {
-        public int ID;
+        public int ID { get; set; }
         public string Name { get; private set; }
         public  TimeSpan Time { get; private set; }
         public DateTime AchievedAt { get; private set; }

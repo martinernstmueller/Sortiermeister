@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using RestAPI.Models;
 using RestAPI.Services;
 using RestAPI.Utilities;
@@ -21,7 +22,11 @@ namespace RestAPI.Controllers
             {
                 Validator.ValidateString(request.Name, nameof(request.Name));
                 WinnerRecord record = _Service.CreateRecord(request);
-                return Ok(record);
+                return CreatedAtRoute(
+                    routeName: "GetWinner",
+                    routeValues: new { id = record.ID },
+                    value: record
+                );
             }
             catch (ArgumentException aEx)
             {
