@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RestAPI.Models;
 using RestAPI.Services;
 using RestAPI.Utilities;
@@ -11,17 +10,16 @@ namespace RestAPI.Controllers
     public class WinnerRecordController : BaseController
     {
         private readonly WinnerRecordService _Service;
-        public WinnerRecordController(WinnerRecordService service) : base()
-        {
+        public WinnerRecordController(WinnerRecordService service) : base() =>
             _Service = service;
-        }
+
         [HttpPost]
         public IActionResult CreateWinnerRecord([FromBody] WinnerRecord request)
         {
             try
             {
-                Validator.ValidateString(request.Name, nameof(request.Name));
-                WinnerRecord record = _Service.CreateRecord(request);
+                Validator.ValidateWinnerRecord(request);
+                var record = _Service.CreateRecord(request);
                 return CreatedAtRoute(
                     routeName: "GetWinner",
                     routeValues: new { id = record.ID },
@@ -37,13 +35,55 @@ namespace RestAPI.Controllers
                 return HandleInternalError(ex);
             }
         }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteRecord(int id)
+        {
+            try
+            {
+                return Ok(_Service.DeleteRecordByID(id));
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return HandleInternalError(ex);
+            }
+        }
+
         [HttpGet("{id}", Name = "GetWinner")]
         public IActionResult GetRecord(int id)
         {
             try
             {
-                WinnerRecord record = _Service.GetRecordByID(id);
-                return Ok(record);
+                return Ok(_Service.GetRecordByID(id));
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return HandleInternalError(ex);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetTopRecords(
+                [FromQuery] int? limit,
+                [FromQuery] DateTime? startDate,
+                [FromQuery] DateTime? endDate
+            )
+        {
+            try
+            {
+                var records = _Service.GetTopRecords(
+                    limit,
+                    startDate,
+                    endDate
+                );
+                return Ok(records);
             }
             catch (KeyNotFoundException knfEx)
             {
