@@ -3,7 +3,7 @@ using RestAPI.Models;
 
 namespace RestAPI.Services
 {
-    public class WinnerRecordService
+    public class WinnerRecordService : IWinnerRecordService
     {
         private readonly AppDbContext _Context;
         public WinnerRecordService(AppDbContext context) =>

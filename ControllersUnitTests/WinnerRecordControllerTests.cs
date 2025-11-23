@@ -1,45 +1,31 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using RestAPI.Controllers;
 using RestAPI.Models;
 using RestAPI.Services;
-using RestAPI.Database;
 
 namespace ControllersUnitTests
 {
     public class WinnerRecordControllerTests
     {
-        private AppDbContext _DbContext;
-        private WinnerRecordService _Service;
+        private Mock<IWinnerRecordService> _ServiceMock;
         private WinnerRecordController _Controller;
+
         private WinnerRecord CreateTestRecord(string name = "TestName", TimeSpan? time = null, DateTime? achievedAt = null)
         {
             return new WinnerRecord(name, time ?? TimeSpan.FromSeconds(120), achievedAt ?? DateTime.UtcNow);
         }
-        private void AddRecordToDb(WinnerRecord record)
-        {
-            _DbContext.WinnerRecords.Add(record);
-            _DbContext.SaveChanges();
-        }
         [SetUp]
         public void Setup()
         {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            _DbContext = new AppDbContext(options);
-            _Service = new WinnerRecordService(_DbContext);
-            _Controller = new WinnerRecordController(_Service);
-        }
-        [TearDown]
-        public void TearDown()
-        {
-            _DbContext.Dispose();
+            _ServiceMock = new Mock<IWinnerRecordService>();
+            _Controller = new WinnerRecordController(_ServiceMock.Object);
         }
         [Test]
         public void CreateWinnerRecord_ValidRequest_ReturnsCreatedAtRoute()
         {
             var testRecord = CreateTestRecord();
+            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<WinnerRecord>())).Returns(testRecord);
             var result = _Controller.CreateWinnerRecord(testRecord);
             var createdResult = result as CreatedAtRouteResult;
             Assert.IsNotNull(createdResult);
@@ -57,6 +43,8 @@ namespace ControllersUnitTests
         public void CreateWinnerRecord_InvalidRequest_ReturnsBadRequest()
         {
             var invalidRecord = CreateTestRecord(null);
+            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<WinnerRecord>()))
+                .Throws(new ArgumentException("Invalid record"));
             var result = _Controller.CreateWinnerRecord(invalidRecord);
             Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
         }
@@ -64,109 +52,138 @@ namespace ControllersUnitTests
         public void GetRecord_ValidID_ReturnsOkWithRecord()
         {
             var record = CreateTestRecord();
-            AddRecordToDb(record);
+            _ServiceMock.Setup(s => s.GetRecordByID(record.ID)).Returns(record);
             var result = _Controller.GetRecord(record.ID);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.That(okResult.Value, Is.TypeOf<WinnerRecord>());
-            var returnedRecord = (WinnerRecord)okResult.Value!;
-            Assert.That(returnedRecord.ID, Is.EqualTo(record.ID));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                Assert.That(okResult.Value, Is.TypeOf<WinnerRecord>());
+                var returnedRecord = (WinnerRecord)okResult.Value!;
+                Assert.That(returnedRecord.ID, Is.EqualTo(record.ID));
+            });
         }
         [Test]
         public void GetRecord_InvalidID_ReturnsNotFound()
         {
+            _ServiceMock.Setup(s => s.GetRecordByID(It.IsAny<int>()))
+                .Throws(new KeyNotFoundException("Record not found"));
             var result = _Controller.GetRecord(-1);
             Assert.That(result, Is.TypeOf<NotFoundObjectResult>());
         }
+
         [Test]
         public void DeleteRecord_ValidID_ReturnsOk()
         {
             var record = CreateTestRecord();
-            AddRecordToDb(record);
+            _ServiceMock.Setup(s => s.DeleteRecordByID(record.ID)).Returns(record);
             var result = _Controller.DeleteRecord(record.ID);
             Assert.That(result, Is.TypeOf<OkObjectResult>());
         }
+
         [Test]
         public void DeleteRecord_InvalidID_ReturnsNotFound()
         {
+            _ServiceMock.Setup(s => s.DeleteRecordByID(It.IsAny<int>()))
+                .Throws(new KeyNotFoundException("Record not found"));
             var result = _Controller.DeleteRecord(-1);
             Assert.That(result, Is.TypeOf<NotFoundObjectResult>());
         }
+
         [Test]
         public void GetTopRecords_ValidRequest_ReturnsOkWithRecords()
         {
             var record1 = CreateTestRecord("A", TimeSpan.FromSeconds(100), DateTime.UtcNow.AddDays(-1));
             var record2 = CreateTestRecord("B", TimeSpan.FromSeconds(90), DateTime.UtcNow);
-            AddRecordToDb(record1);
-            AddRecordToDb(record2);
+            var records = new List<WinnerRecord> { record1, record2 };
+            _ServiceMock.Setup(s => s.GetTopRecords(2, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(2, null, null);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records.Count, Is.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords.Count, Is.EqualTo(2));
+            });
         }
+
         [Test]
         public void GetTopRecords_FilterByTimeFrame_ReturnsOnlyRecordsWithinRange()
         {
             var now = DateTime.UtcNow;
             var recordInRange = CreateTestRecord("InRange", TimeSpan.FromSeconds(100), now.AddDays(-1));
-            var recordOutOfRange = CreateTestRecord("OutOfRange", TimeSpan.FromSeconds(90), now.AddDays(-10));
-            AddRecordToDb(recordInRange);
-            AddRecordToDb(recordOutOfRange);
+            var records = new List<WinnerRecord> { recordInRange };
+            _ServiceMock.Setup(s => s.GetTopRecords(10, now.AddDays(-2), now)).Returns(records);
             var result = _Controller.GetTopRecords(10, now.AddDays(-2), now);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records.Count, Is.EqualTo(1));
-            Assert.That(records[0].Name, Is.EqualTo("InRange"));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords.Count, Is.EqualTo(1));
+                Assert.That(returnedRecords[0].Name, Is.EqualTo("InRange"));
+            });
         }
+
         [Test]
         public void GetTopRecords_NoRecords_ReturnsOkWithEmptyList()
         {
+            _ServiceMock.Setup(s => s.GetTopRecords(2, null, null)).Returns(new List<WinnerRecord>());
             var result = _Controller.GetTopRecords(2, null, null);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records, Is.Empty);
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords, Is.Empty);
+            });
         }
+
         [Test]
         public void GetTopRecords_LimitZero_ReturnsEmptyList()
         {
-            var record = CreateTestRecord("A");
-            AddRecordToDb(record);
+            _ServiceMock.Setup(s => s.GetTopRecords(0, null, null)).Returns(new List<WinnerRecord>());
             var result = _Controller.GetTopRecords(0, null, null);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records, Is.Empty);
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords, Is.Empty);
+            });
         }
         [Test]
         public void GetTopRecords_LimitGreaterThanAvailable_ReturnsAllRecords()
         {
             var record1 = CreateTestRecord("A");
             var record2 = CreateTestRecord("B");
-            AddRecordToDb(record1);
-            AddRecordToDb(record2);
+            var records = new List<WinnerRecord> { record1, record2 };
+            _ServiceMock.Setup(s => s.GetTopRecords(10, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(10, null, null);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records.Count, Is.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords.Count, Is.EqualTo(2));
+            });
         }
         [Test]
         public void GetTopRecords_LimitLessThanAvailable_ReturnsLimitedRecords()
         {
             var record1 = CreateTestRecord("A", TimeSpan.FromSeconds(100));
-            var record2 = CreateTestRecord("B", TimeSpan.FromSeconds(90));
-            AddRecordToDb(record1);
-            AddRecordToDb(record2);
+            var records = new List<WinnerRecord> { record1 };
+            _ServiceMock.Setup(s => s.GetTopRecords(1, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(1, null, null);
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records.Count, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords.Count, Is.EqualTo(1));
+            });
         }
         [Test]
         public void GetTopRecords_BoundaryDates_IncludesRecordsOnBoundary()
@@ -174,15 +191,18 @@ namespace ControllersUnitTests
             var boundaryDate = DateTime.UtcNow.Date;
             var recordOnStart = CreateTestRecord("Start", TimeSpan.FromSeconds(100), boundaryDate);
             var recordOnEnd = CreateTestRecord("End", TimeSpan.FromSeconds(90), boundaryDate.AddDays(1));
-            AddRecordToDb(recordOnStart);
-            AddRecordToDb(recordOnEnd);
+            var records = new List<WinnerRecord> { recordOnStart, recordOnEnd };
+            _ServiceMock.Setup(s => s.GetTopRecords(10, boundaryDate, boundaryDate.AddDays(1))).Returns(records);
             var result = _Controller.GetTopRecords(10, boundaryDate, boundaryDate.AddDays(1));
             var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            var records = (List<WinnerRecord>)okResult.Value!;
-            Assert.That(records.Count, Is.EqualTo(2));
-            Assert.That(records.Any(r => r.Name == "Start"));
-            Assert.That(records.Any(r => r.Name == "End"));
+            Assert.Multiple(() =>
+            {
+                Assert.IsNotNull(okResult);
+                var returnedRecords = (List<WinnerRecord>)okResult.Value!;
+                Assert.That(returnedRecords.Count, Is.EqualTo(2));
+                Assert.That(returnedRecords.Any(r => r.Name == "Start"));
+                Assert.That(returnedRecords.Any(r => r.Name == "End"));
+            });
         }
     }
 }

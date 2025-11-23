@@ -9,8 +9,8 @@ namespace RestAPI.Controllers
     [Route("api/[controller]")]
     public class WinnerRecordController : BaseController
     {
-        private readonly WinnerRecordService _Service;
-        public WinnerRecordController(WinnerRecordService service) : base() =>
+        private readonly IWinnerRecordService _Service;
+        public WinnerRecordController(IWinnerRecordService service) : base() =>
             _Service = service;
 
         [HttpPost]
