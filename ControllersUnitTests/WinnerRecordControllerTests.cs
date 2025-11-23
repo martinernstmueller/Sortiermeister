@@ -99,9 +99,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(2, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(2, null, null);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords.Count, Is.EqualTo(2));
@@ -117,9 +117,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(10, now.AddDays(-2), now)).Returns(records);
             var result = _Controller.GetTopRecords(10, now.AddDays(-2), now);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords.Count, Is.EqualTo(1));
                 Assert.That(returnedRecords[0].Name, Is.EqualTo("InRange"));
@@ -132,9 +132,10 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(2, null, null)).Returns(new List<WinnerRecord>());
             var result = _Controller.GetTopRecords(2, null, null);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
+                
                 Assert.That(okResult.Value, Is.TypeOf<List<WinnerRecord>>());
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords, Is.Empty);
@@ -147,9 +148,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(0, null, null)).Returns(new List<WinnerRecord>());
             var result = _Controller.GetTopRecords(0, null, null);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords, Is.Empty);
             });
@@ -163,9 +164,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(10, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(10, null, null);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords.Count, Is.EqualTo(2));
             });
@@ -178,9 +179,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(1, null, null)).Returns(records);
             var result = _Controller.GetTopRecords(1, null, null);
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords.Count, Is.EqualTo(1));
             });
@@ -195,9 +196,9 @@ namespace ControllersUnitTests
             _ServiceMock.Setup(s => s.GetTopRecords(10, boundaryDate, boundaryDate.AddDays(1))).Returns(records);
             var result = _Controller.GetTopRecords(10, boundaryDate, boundaryDate.AddDays(1));
             var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
             Assert.Multiple(() =>
             {
-                Assert.IsNotNull(okResult);
                 var returnedRecords = (List<WinnerRecord>)okResult.Value!;
                 Assert.That(returnedRecords.Count, Is.EqualTo(2));
                 Assert.That(returnedRecords.Any(r => r.Name == "Start"));
