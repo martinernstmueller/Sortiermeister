@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="ControllersUnitTests/ControllersUnitTests.csproj" Id="174aaed1-87ee-4996-8da6-f2eaa5dd262f" />
   <Project Path="ModelsUnitTests/ModelsUnitTests.csproj" Id="6ace0ef3-381b-4641-91e4-6f206b4ff39b" />
   <Project Path="RestAPI/RestAPI.csproj" />
 </Solution>
