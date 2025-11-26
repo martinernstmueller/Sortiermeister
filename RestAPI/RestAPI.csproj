@@ -15,9 +15,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="wwwroot\sortiermeister\app\game\components\" />
-    <Folder Include="wwwroot\sortiermeister\app\game\algorithms\" />
-    <Folder Include="wwwroot\sortiermeister\app\leaderboard\components\" />
     <Folder Include="wwwroot\sortiermeister\components\" />
     <Folder Include="wwwroot\sortiermeister\lib\" />
   </ItemGroup>
