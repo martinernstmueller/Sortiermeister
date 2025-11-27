@@ -20,9 +20,8 @@ export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
     return (
         <div className={`w-11/12 h-12 rounded-xl border-2 grid grid-cols-3 items-center px-4 justify-between mb-3 ${color}`}>
             <div className="font-bold">{rank}</div>
-            <div className="font-bold">{name}</div>
+            <div className="font-bold flex justify-center">{name}</div>
             <div className="font-bold flex justify-end">{time}</div>
         </div>
-
     )
 }
