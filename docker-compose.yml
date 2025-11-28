@@ -7,8 +7,11 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
     volumes:
       - sortiermeister-db:/app/data
+    networks:
+      - sortiermeister-network
 
   web:
     build:
@@ -16,8 +19,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - API_URL=http://api:8080
+      - NODE_ENV=production
     depends_on:
       - api
+    networks:
+      - sortiermeister-network
+
+networks:
+  sortiermeister-network:
+    driver: bridge
 
 volumes:
   sortiermeister-db:

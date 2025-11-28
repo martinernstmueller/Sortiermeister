@@ -105,10 +105,8 @@ export default function NumberRow({
       setWinPopup({ time: total });
 
       sendWinnerRecord({
-        playerName: settings!.playerName,
-        time: total,
-        algorithm: settings!.algorithm,
-        difficulty: settings!.difficulty,
+        name: settings!.playerName,
+        time: total
       });
 
       stopRef.current = true;
