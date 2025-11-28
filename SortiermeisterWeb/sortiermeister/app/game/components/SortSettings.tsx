@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSession } from "../../contexts/SessionContext";
 
 export type SortSettings = {
   playerName: string;
@@ -12,58 +13,92 @@ export default function SortSettingsModal({
 }: {
   onStart: (settings: SortSettings) => void;
 }) {
-  const [playerName, setPlayerName] = useState("");
-  const [algorithm, setAlgorithm] = useState<"bubble" | "insertion">("bubble");
-  const [difficulty, setDifficulty] = useState(400);
+  const { session, setSession } = useSession();
+  
+  const [playerName, setPlayerName] = useState(session?.playerName || "");
+  const [algorithm, setAlgorithm] = useState<"bubble" | "insertion">(session?.algorithm || "bubble");
+  const [difficulty, setDifficulty] = useState(session?.difficulty || 400);
 
   function handleStart() {
     if (!playerName.trim()) return;
-    onStart({
+    
+    const settings = {
       playerName,
       algorithm,
       difficulty,
-    });
+    };
+    
+    setSession(settings);
+    onStart(settings);
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999]">
-      <div className="bg-gray-400 p-6 rounded-xl w-80 flex flex-col gap-4">
+    <div className="fixed inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 flex items-center justify-center z-[999]">
+      <div className="bg-zinc-800/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md border border-zinc-700">
+        <h1 className="text-4xl font-bold text-white mb-8 text-center tracking-tight">
+          Sortiermeister
+        </h1>
 
-        <h2 className="text-xl font-bold text-white">Sortiermeister</h2>
+        <div className="flex flex-col gap-5">
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Spielername
+            </label>
+            <input
+              className="w-full bg-zinc-700/50 border border-zinc-600 text-white p-3 rounded-lg 
+                         placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500 
+                         focus:border-transparent transition-all"
+              placeholder="Gib deinen Namen ein..."
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+            />
+          </div>
 
-        <input
-          className="border p-2 rounded"
-          placeholder="Spielername"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-        />
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Sortieralgorithmus
+            </label>
+            <select
+              className="w-full bg-zinc-700/50 border border-zinc-600 text-white p-3 rounded-lg 
+                         focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent 
+                         transition-all cursor-pointer"
+              value={algorithm}
+              onChange={(e) => setAlgorithm(e.target.value as "bubble" | "insertion")}
+            >
+              <option value="bubble">Bubble Sort</option>
+              <option value="insertion">Insertion Sort</option>
+            </select>
+          </div>
 
-        <select
-          className="border p-2 rounded"
-          value={algorithm}
-          onChange={(e) => setAlgorithm(e.target.value as "bubble" | "insertion")}
-        >
-          <option value="bubble">Bubble Sort</option>
-          <option value="insertion">Insertion Sort</option>
-        </select>
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Schwierigkeit
+            </label>
+            <select
+              className="w-full bg-zinc-700/50 border border-zinc-600 text-white p-3 rounded-lg 
+                         focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent 
+                         transition-all cursor-pointer"
+              value={difficulty}
+              onChange={(e) => setDifficulty(Number(e.target.value))}
+            >
+              <option value={1200}>Easy</option>
+              <option value={1550}>Medium</option>
+              <option value={650}>Hard</option>
+              <option value={450}>Impossible</option>
+            </select>
+          </div>
 
-        <select
-          className="border p-2 rounded"
-          value={difficulty}
-          onChange={(e) => setDifficulty(Number(e.target.value))}
-        >
-          <option value={800}>Easy</option>
-          <option value={400}>Medium</option>
-          <option value={150}>Hard</option>
-          <option value={20}>Impossible</option>
-        </select>
-
-        <button
-          onClick={handleStart}
-          className="bg-blue-600 text-white rounded-xl py-2 mt-4"
-        >
-          Start
-        </button>
+          <button
+            onClick={handleStart}
+            disabled={!playerName.trim()}
+            className="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold 
+                       rounded-xl py-3.5 mt-4 hover:from-violet-500 hover:to-purple-500 
+                       disabled:from-zinc-700 disabled:to-zinc-700 disabled:cursor-not-allowed 
+                       transition-all duration-200 shadow-lg hover:shadow-violet-500/50"
+          >
+            Start
+          </button>
+        </div>
       </div>
     </div>
   );
