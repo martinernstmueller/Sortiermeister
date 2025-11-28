@@ -2,7 +2,7 @@ import PlayerRow from "./components/PlayerRow";
 type Player = {
     id: number;
     name: string;
-    time: number;
+    time: string;
 };
 
 // async function getRanks() : Promise<Player[]> {
@@ -15,23 +15,23 @@ type Player = {
 async function getRanks() {
   // Backend später → mock Daten
   return [
-    { id: 1, name: "Player A", time: 1234 },
-    { id: 2, name: "Player B", time: 900 },
-    { id: 3, name: "Player C", time: 2500 },
-    { id: 4, name: "Player D", time: 1500 },
-    { id: 5, name: "Player E", time: 800 },
-    { id: 6, name: "Player F", time: 3000 },
-    { id: 7, name: "Player G", time: 1100 },
-    { id: 8, name: "Player H", time: 700 },
-    { id: 9, name: "Player I", time: 4000 },
-    { id: 10, name: "Player J", time: 600 },
+    { id: 1, name: "Player A", time: "00:00:01.234" },
+    { id: 2, name: "Player B", time: "00:00:00.900" },
+    { id: 3, name: "Player C", time: "00:00:02.500" },
+    { id: 4, name: "Player D", time: "00:00:01.500" },
+    { id: 5, name: "Player E", time: "00:00:00.800" },
+    { id: 6, name: "Player F", time: "00:00:03.000" },
+    { id: 7, name: "Player G", time: "00:00:01.100" },
+    { id: 8, name: "Player H", time: "00:00:00.700" },
+    { id: 9, name: "Player I", time: "00:00:04.000" },
+    { id: 10, name: "Player J", time: "00:00:00.600" },
   ];
 }
 
 
 export default async function LeaderboardPage() {
     const data = await getRanks();
-    const sortedRanks = data.sort((a, b) => a.time - b.time);
+    const sortedRanks = data.sort((a, b) => a.time.localeCompare(b.time));
 
     const rankedPlayers = sortedRanks.map((player, index) => ({
         ...player,
@@ -39,13 +39,29 @@ export default async function LeaderboardPage() {
 
     }));
     return (
-        <div className="flex flex-col items-center pt-10 bg-gradient-to-b from-black via-slate-800 to-blue-300 h-screen w-screen">
-            <h1 className="text-4xl font-bold mb-8">Leaderboard</h1>
-            <div className="w-3/4 h-5/6  rounded-xl flex flex-col items-center p-4 overflow-y-auto">
-            {rankedPlayers.map((player) => (
-                <PlayerRow key={player.rank} rank={player.rank} name={player.name} time={player.time}/>
-            ))}
+        <div className="flex flex-col items-center justify-center min-h-screen w-full 
+                        bg-gradient-to-br from-zinc-900 via-black to-zinc-900 py-10 px-4">
+            <div className="w-full max-w-4xl">
+                <h1 className="text-5xl font-bold text-white mb-8 text-center tracking-tight">
+                    Leaderboard
+                </h1>
+                
+                <div className="bg-zinc-800/50 backdrop-blur-sm rounded-2xl border border-zinc-700 
+                                shadow-2xl p-6 overflow-hidden">
+                    <div className="overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
+                        <div className="space-y-3">
+                            {rankedPlayers.map((player) => (
+                                <PlayerRow 
+                                    key={player.rank} 
+                                    rank={player.rank} 
+                                    name={player.name} 
+                                    time={player.time}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-</div>
     )
 }

@@ -5,6 +5,7 @@ import SortSettingsModal, { SortSettings } from "./SortSettings";
 import { bubbleSort } from "../algorithms/bubbleSort";
 import { insertionSort } from "../algorithms/insertionSort";
 import { sendWinnerRecord } from "../lib/api/winnerRecord";
+import { useSession } from "../../contexts/SessionContext";
 
 export type ColoredNumber = {
   number: number;
@@ -26,7 +27,16 @@ const algorithms = {
   insertion: insertionSort,
 };
 
-export default function NumberRow({ numbers, onRestart }: { numbers: number[], onRestart: () => void }) {
+export default function NumberRow({ 
+  numbers, 
+  onRestart,
+  onChangeDifficulty,
+}: { 
+  numbers: number[], 
+  onRestart: () => void,
+  onChangeDifficulty: () => void,
+}) {
+  const { session, clearSession } = useSession();
   const [settings, setSettings] = useState<SortSettings | null>(null);
   const [playerArray, setPlayerArray] = useState<ColoredNumber[]>([]);
   const [botArray, setBotArray] = useState<ColoredNumber[]>([]);
@@ -37,6 +47,7 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
   const startTimeRef = useRef<number>(0);
   const stopRef = useRef<boolean>(false);
   const startDelay = 3000;
+  
   useEffect(() => {
     const init = numbers.map(n => ({
       number: n,
@@ -46,6 +57,12 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
     setPlayerArray(init);
     setBotArray(init.map(x => ({ ...x })));
   }, [numbers]);
+
+  useEffect(() => {
+    if (session && !settings) {
+      handleStart(session);
+    }
+  }, [session]);
 
   function handleStart(s: SortSettings) {
     setSettings(s);
@@ -142,80 +159,172 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
     startTimeRef.current = Date.now();
     setWinPopup(null);
     setLosePopup(false);
-    setSettings(null);
   }
 
-  function handleRestart() {
+  function handlePlayAgain() {
     restartGame();
     onRestart();
+    if (session) {
+      setTimeout(() => runBotSort(session), startDelay);
+    }
+  }
+
+  function handleChangeDifficultyClick() {
+    stopRef.current = true;
+    setWinPopup(null);
+    setLosePopup(false);
+    setSettings(null);
+    onChangeDifficulty();
+  }
+
+  function handleLogout() {
+    stopRef.current = true;
+    clearSession();
+    setWinPopup(null);
+    setLosePopup(false);
+    setSettings(null);
+    onChangeDifficulty();
   }
 
   return (
-    <div className="flex flex-col gap-10 items-center">
+    <div className="flex flex-col gap-12 items-center w-full px-4">
 
       {!settings && <SortSettingsModal onStart={handleStart} />}
 
-      <div className="flex gap-4">
-        {playerArray.map((obj, i) => (
-          <button
-            key={i}
-            onClick={() => handlePlayerClick(i)}
-            className={`${firstSelected === i ? "ring-4 ring-purple-400" : ""}`}
-          >
-            <NumberBox number={obj.number} color={obj.color} />
-          </button>
-        ))}
-      </div>
+      <div className="flex flex-col gap-8 items-center w-full">
+        <div className="flex flex-col gap-4 items-center">
+          <h2 className="text-xl font-semibold text-violet-400 tracking-wide">
+            Du sortierst
+          </h2>
+          <div className="flex gap-4 flex-wrap justify-center">
+            {playerArray.map((obj, i) => (
+              <button
+                key={i}
+                onClick={() => handlePlayerClick(i)}
+                className={`transition-all duration-200 ${
+                  firstSelected === i ? "ring-4 ring-violet-400 ring-offset-4 ring-offset-black scale-105" : ""
+                }`}
+              >
+                <NumberBox number={obj.number} color={obj.color} />
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <div className="flex gap-4">
-        {botArray.map((obj, i) => (
-          <NumberBox
-            key={i}
-            number={obj.number}
-            color={obj.color}
-            isActive={activeIndex === i}
-          />
-        ))}
+        <div className="h-px w-full max-w-4xl bg-gradient-to-r from-transparent via-zinc-700 to-transparent"></div>
+
+        <div className="flex flex-col gap-4 items-center">
+          <h2 className="text-xl font-semibold text-red-400 tracking-wide">
+            Bot
+          </h2>
+          <div className="flex gap-4 flex-wrap justify-center">
+            {botArray.map((obj, i) => (
+              <NumberBox
+                key={i}
+                number={obj.number}
+                color={obj.color}
+                isActive={activeIndex === i}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {winPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999]">
-          <div className="bg-gray-400 p-8 rounded-xl shadow-xl flex flex-col items-center gap-4">
-            <h2 className="text-2xl font-bold text-green-600">
-              🎉 DU HAST GEWONNEN!
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[999]">
+          <div className="bg-gradient-to-br from-green-900 to-emerald-900 p-10 rounded-2xl shadow-2xl 
+                          flex flex-col items-center gap-6 border-2 border-green-500/50 max-w-md w-full mx-4">
+            <div className="text-6xl">🎉</div>
+            
+            <h2 className="text-3xl font-bold text-white text-center">
+              Du hast gewonnen!
             </h2>
 
-            <p className="text-xl font-mono text-purple-600">
-              Zeit: {formatTime(winPopup.time)}
+            <p className="text-zinc-300 text-center">
+              Glückwunsch! Du warst schneller als der Bot.
             </p>
 
-            <button
-              onClick={handleRestart}
-              className="px-4 py-2 bg-purple-600 rounded-2xl text-white hover:bg-purple-700 transition"
-            >
-              Restart
-            </button>
+            <div className="bg-black/30 px-6 py-3 rounded-lg">
+              <p className="text-sm text-zinc-400 mb-1 text-center">Deine Zeit</p>
+              <p className="text-2xl font-mono text-green-400 font-bold text-center">
+                {formatTime(winPopup.time)}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 w-full mt-2">
+              <button
+                onClick={handlePlayAgain}
+                className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 
+                           rounded-xl text-white font-semibold hover:from-green-500 hover:to-emerald-500 
+                           transition-all duration-200 shadow-lg"
+              >
+                Nochmal spielen
+              </button>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleChangeDifficultyClick}
+                  className="flex-1 px-4 py-2.5 bg-zinc-700 rounded-lg text-white text-sm 
+                             hover:bg-zinc-600 transition-all duration-200"
+                >
+                  Schwierigkeit ändern
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2.5 bg-zinc-700 rounded-lg text-white text-sm 
+                             hover:bg-zinc-600 transition-all duration-200"
+                >
+                  Abmelden
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {losePopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[999]">
-          <div className="bg-red-500 p-8 rounded-xl shadow-xl flex flex-col items-center gap-4">
-            <h2 className="text-2xl font-bold text-white">
-              ❌ DU HAST VERLOREN!
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[999]">
+          <div className="bg-gradient-to-br from-red-900 to-rose-900 p-10 rounded-2xl shadow-2xl 
+                          flex flex-col items-center gap-6 border-2 border-red-500/50 max-w-md w-full mx-4">
+            <div className="text-6xl">😈</div>
+            
+            <h2 className="text-3xl font-bold text-white text-center">
+              Du hast verloren!
             </h2>
 
-            <p className="text-lg text-white">
-              Der Bot war schneller 😈
+            <p className="text-zinc-300 text-center">
+              Der Bot war schneller. Versuch es nochmal!
             </p>
 
-            <button
-              onClick={restartGame}
-              className="px-4 py-2 bg-black rounded-xl text-white hover:bg-gray-900 transition"
-            >
-              Restart
-            </button>
+            <div className="flex flex-col gap-3 w-full mt-2">
+              <button
+                onClick={handlePlayAgain}
+                className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 
+                           rounded-xl text-white font-semibold hover:from-red-500 hover:to-rose-500 
+                           transition-all duration-200 shadow-lg"
+              >
+                Nochmal spielen
+              </button>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleChangeDifficultyClick}
+                  className="flex-1 px-4 py-2.5 bg-zinc-700 rounded-lg text-white text-sm 
+                             hover:bg-zinc-600 transition-all duration-200"
+                >
+                  Schwierigkeit ändern
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2.5 bg-zinc-700 rounded-lg text-white text-sm 
+                             hover:bg-zinc-600 transition-all duration-200"
+                >
+                  Abmelden
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
