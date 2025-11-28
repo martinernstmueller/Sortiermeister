@@ -116,7 +116,6 @@ export default function NumberRow({
   }
 
   async function runBotSort(s: SortSettings) {
-    
     const sorter = algorithms[s.algorithm];
     const arr = [...botArray];
 
@@ -142,31 +141,15 @@ export default function NumberRow({
     setActiveIndex(null);
   }
 
-  function restartGame() {
-    const init = numbers.map(n => ({
-      number: n,
-      color: randomColor(),
-    }));
-
-    stopRef.current = false;
-
-    setPlayerArray(init);
-    setBotArray(init.map(x => ({ ...x })));
-
-    setFirstSelected(null);
-    setActiveIndex(null);
-
-    startTimeRef.current = Date.now();
+  function handlePlayAgain() {
+    stopRef.current = true;
     setWinPopup(null);
     setLosePopup(false);
-  }
-
-  function handlePlayAgain() {
-    restartGame();
+    setFirstSelected(null);
+    setActiveIndex(null);
+    setSettings(null);
+    
     onRestart();
-    if (session) {
-      setTimeout(() => runBotSort(session), startDelay);
-    }
   }
 
   function handleChangeDifficultyClick() {
