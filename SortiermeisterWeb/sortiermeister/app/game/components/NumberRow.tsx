@@ -26,7 +26,7 @@ const algorithms = {
   insertion: insertionSort,
 };
 
-export default function NumberRow({ numbers }: { numbers: number[] }) {
+export default function NumberRow({ numbers, onRestart }: { numbers: number[], onRestart: () => void }) {
   const [settings, setSettings] = useState<SortSettings | null>(null);
   const [playerArray, setPlayerArray] = useState<ColoredNumber[]>([]);
   const [botArray, setBotArray] = useState<ColoredNumber[]>([]);
@@ -35,7 +35,8 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
   const [winPopup, setWinPopup] = useState<{ time: number } | null>(null);
   const [losePopup, setLosePopup] = useState<boolean>(false);
   const startTimeRef = useRef<number>(0);
-
+  const stopRef = useRef<boolean>(false);
+  const startDelay = 3000;
   useEffect(() => {
     const init = numbers.map(n => ({
       number: n,
@@ -49,7 +50,8 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
   function handleStart(s: SortSettings) {
     setSettings(s);
     startTimeRef.current = Date.now();
-    setTimeout(() => runBotSort(s), 300);
+    stopRef.current = false;
+    setTimeout(() => runBotSort(s), startDelay);
   }
 
   function handlePlayerClick(i: number) {
@@ -71,13 +73,10 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
   function formatTime(ms: number) {
     const hours = Math.floor(ms / 3600000);
     ms %= 3600000;
-
     const minutes = Math.floor(ms / 60000);
     ms %= 60000;
-
     const seconds = Math.floor(ms / 1000);
     const milli = ms % 1000;
-
     return `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}.${String(milli).padStart(3,"0")}`;
   }
 
@@ -86,7 +85,6 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
 
     if (arr.every((v, i) => v.number === sorted[i].number)) {
       const total = Date.now() - startTimeRef.current;
-
       setWinPopup({ time: total });
 
       sendWinnerRecord({
@@ -95,25 +93,31 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
         algorithm: settings!.algorithm,
         difficulty: settings!.difficulty,
       });
+
+      stopRef.current = true;
     }
   }
 
   async function runBotSort(s: SortSettings) {
+    
     const sorter = algorithms[s.algorithm];
     const arr = [...botArray];
 
     for await (const step of sorter(arr)) {
-
-      setBotArray([...step.array]);
-      setActiveIndex(step.activeNumber);
+      if (stopRef.current) return;
 
       const sorted = [...step.array].sort((a, b) => a.number - b.number);
       const botFinished = step.array.every((v, i) => v.number === sorted[i].number);
 
       if (botFinished) {
-        setLosePopup(true);
+        if (!stopRef.current) setLosePopup(true);
         return;
       }
+
+      if (stopRef.current) return;
+
+      setBotArray([...step.array]);
+      setActiveIndex(step.activeNumber);
 
       await new Promise(res => setTimeout(res, s.difficulty));
     }
@@ -127,6 +131,8 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
       color: randomColor(),
     }));
 
+    stopRef.current = false;
+
     setPlayerArray(init);
     setBotArray(init.map(x => ({ ...x })));
 
@@ -139,10 +145,16 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
     setSettings(null);
   }
 
+  function handleRestart() {
+    restartGame();
+    onRestart();
+  }
+
   return (
     <div className="flex flex-col gap-10 items-center">
 
       {!settings && <SortSettingsModal onStart={handleStart} />}
+
       <div className="flex gap-4">
         {playerArray.map((obj, i) => (
           <button
@@ -178,7 +190,7 @@ export default function NumberRow({ numbers }: { numbers: number[] }) {
             </p>
 
             <button
-              onClick={restartGame}
+              onClick={handleRestart}
               className="px-4 py-2 bg-purple-600 rounded-2xl text-white hover:bg-purple-700 transition"
             >
               Restart
