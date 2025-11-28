@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="docker-compose.production.yml" />
     <File Path="docker-compose.yml" />
   </Folder>
   <Project Path="ControllersUnitTests/ControllersUnitTests.csproj" Id="174aaed1-87ee-4996-8da6-f2eaa5dd262f" />
