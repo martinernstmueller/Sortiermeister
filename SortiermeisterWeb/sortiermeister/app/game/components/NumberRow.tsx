@@ -36,7 +36,7 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
   const [losePopup, setLosePopup] = useState<boolean>(false);
   const startTimeRef = useRef<number>(0);
   const stopRef = useRef<boolean>(false);
-
+  const startDelay = 3000;
   useEffect(() => {
     const init = numbers.map(n => ({
       number: n,
@@ -51,7 +51,7 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
     setSettings(s);
     startTimeRef.current = Date.now();
     stopRef.current = false;
-    setTimeout(() => runBotSort(s), 300);
+    setTimeout(() => runBotSort(s), startDelay);
   }
 
   function handlePlayerClick(i: number) {
@@ -99,6 +99,7 @@ export default function NumberRow({ numbers, onRestart }: { numbers: number[], o
   }
 
   async function runBotSort(s: SortSettings) {
+    
     const sorter = algorithms[s.algorithm];
     const arr = [...botArray];
 
