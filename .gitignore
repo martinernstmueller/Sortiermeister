@@ -398,6 +398,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/RestAPI/Database/data/Sortiermeister.db
-/RestAPI/Database/data/Sortiermeister.db-shm
-/RestAPI/Database/data/Sortiermeister.db-wal
+/RestAPI/Database/data
