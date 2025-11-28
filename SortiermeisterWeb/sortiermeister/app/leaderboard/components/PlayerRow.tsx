@@ -1,7 +1,8 @@
 type PlayerRowProps = {
     rank: number;
     name: string;
-    time: string;
+    time: number; 
+    achievedAt: Date;
 };
 
 export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
@@ -54,8 +55,12 @@ export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
                     {name}
                 </div>
                 
-                <div className="font-mono text-sm text-zinc-300 text-right">
+                <div className="font-mono text-sm text-zinc-300 text-center">
                     {time}
+                </div>
+              
+               <div className="font-semibold text-lg text-white truncate">
+                    {achievedAt}
                 </div>
             </div>
         </div>

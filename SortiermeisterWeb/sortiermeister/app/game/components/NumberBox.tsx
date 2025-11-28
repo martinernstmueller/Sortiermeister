@@ -1,17 +1,16 @@
 "use client";
-import { motion } from "framer-motion";
 
 export default function NumberBox({
-  number,
-  color,
-  isActive = false,
+    number,
+    color,
+    isActive = false,
 }: {
-  number: number;
-  color: string;
-  isActive?: boolean;
+    number: number;
+    color: string;
+    isActive?: boolean;
 }) {
-  const isClient = typeof window !== "undefined";
-  const actualColor = isClient ? color : "bg-gray-300";
+    const isClient = typeof window !== "undefined";
+    const actualColor = isClient ? color : "bg-gray-300";
 
   return (
     <motion.div
