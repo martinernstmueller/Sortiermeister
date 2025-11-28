@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: RestAPI/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - sortiermeister-db:/app/data
+
+  web:
+    build:
+      context: SortiermeisterWeb/sortiermeister
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+networks:
+  sortiermeister-network:
+    driver: bridge
+
+volumes:
+  sortiermeister-db:
