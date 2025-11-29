@@ -1,3 +1,5 @@
+"use client";
+import { useState, useEffect } from "react";
 import PlayerRow from "./components/PlayerRow";
 import { fetchFromAPI } from "../game/lib/api/api";
 
@@ -25,7 +27,6 @@ async function getRanks(
     const res = await fetchFromAPI(`/api/WinnerRecord?${params.toString()}`, {
         cache: "no-store"
     });
-    console.log(res);
     return res.map((record: WinnerRecord) => ({
         name: record.name,
         time: record.time,
@@ -33,15 +34,39 @@ async function getRanks(
     }));
 }
 
+export default function LeaderboardPage() {
+    const [data, setData] = useState<WinnerRecord[]>([]);
+    const [loading, setLoading] = useState(true);
 
-export default async function LeaderboardPage() {
-    const data = await getRanks();
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const records = await getRanks();
+                setData(records);
+            } catch (error) {
+                console.error('Failed to fetch leaderboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+        const interval = setInterval(fetchData, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        );
+    }
 
     const rankedPlayers = data.map((player, index) => ({
         ...player,
         rank: index + 1,
-
     }));
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-full 
                         bg-gradient-to-br from-zinc-900 via-black to-zinc-900 py-10 px-4">
