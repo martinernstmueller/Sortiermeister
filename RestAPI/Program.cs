@@ -6,11 +6,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("SortiermeisterPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+            ?? ["http://localhost:3000"];
+        var allowedMethods = builder.Configuration.GetSection("AllowedMethods").Get<string[]>()
+            ?? ["GET"];
+        policy.WithOrigins(allowedOrigins)
+              .WithMethods(allowedMethods)
+              .WithHeaders("Content-Type", "Authorization")
+              .AllowCredentials();
     });
 });
 
@@ -36,7 +41,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("SortiermeisterPolicy");
 app.UseAuthorization();
 app.MapControllers();
 app.UseStaticFiles();
