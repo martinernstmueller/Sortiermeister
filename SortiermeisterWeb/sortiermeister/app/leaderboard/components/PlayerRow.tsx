@@ -23,19 +23,16 @@ export default function PlayerRow({ rank, name, time, achievedAt } : PlayerRowPr
             return {
                 gradient: "bg-gradient-to-r from-yellow-600/30 to-yellow-500/30",
                 border: "border-yellow-500/50",
-                icon: "?"
             };
         } else if (rank === 2) {
             return {
                 gradient: "bg-gradient-to-r from-gray-400/20 to-gray-300/20",
                 border: "border-gray-400/50",
-                icon: "??"
             };
         } else if (rank === 3) {
             return {
                 gradient: "bg-gradient-to-r from-orange-600/30 to-orange-500/30",
                 border: "border-orange-500/50",
-                icon: "???"
             };
         }
         return {
