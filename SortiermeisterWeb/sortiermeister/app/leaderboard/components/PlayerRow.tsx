@@ -1,7 +1,7 @@
 type PlayerRowProps = {
     rank: number;
     name: string;
-    time: number;
+    time: string;
     achievedAt: Date;
 };
 function formatDate(date: Date): string {
@@ -10,6 +10,12 @@ function formatDate(date: Date): string {
         month: '2-digit',
         year: 'numeric'
     });
+}
+function formatTime(timespan: string): string {
+    const parts = timespan.split(':');
+    const seconds = parseFloat(parts[2]);
+    const formattedSeconds = parseFloat(seconds.toFixed(3)).toString();
+    return `${formattedSeconds}s`;
 }
 export default function PlayerRow({ rank, name, time, achievedAt } : PlayerRowProps) {
     const getRankStyle = () => {
@@ -61,11 +67,11 @@ export default function PlayerRow({ rank, name, time, achievedAt } : PlayerRowPr
                     {name}
                 </div>
                 
-                <div className="font-mono text-sm text-zinc-300 text-right">
-                    {time}
+                <div className="font-semibold text-lg text-white truncate">
+                    {formatTime(time)}
                 </div>
 
-                <div className="font-semibold text-lg text-white truncate">
+                <div className="font-mono text-sm text-zinc-300 text-right">
                     {formatDate(achievedAt)}
                 </div>
             </div>

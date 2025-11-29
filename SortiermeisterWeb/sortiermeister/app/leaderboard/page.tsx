@@ -3,8 +3,8 @@ import { fetchFromAPI } from "../game/lib/api/api";
 
 type WinnerRecord = {
     name: string;
-    time: number; // This represents TimeSpan in milliseconds from the API
-    achievedAt: string; // ISO date string
+    time: string;
+    achievedAt: string;
 };
 
 async function getRanks(
