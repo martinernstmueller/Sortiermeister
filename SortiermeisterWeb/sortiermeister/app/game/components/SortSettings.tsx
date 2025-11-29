@@ -82,9 +82,9 @@ export default function SortSettingsModal({
               onChange={(e) => setDifficulty(Number(e.target.value))}
             >
               <option value={1200}>Easy</option>
-              <option value={1550}>Medium</option>
-              <option value={650}>Hard</option>
-              <option value={450}>Impossible</option>
+              <option value={800}>Medium</option>
+              <option value={350}>Hard</option>
+              <option value={150}>Impossible</option>
             </select>
           </div>
 
