@@ -13,5 +13,11 @@
             Time = time;
             AchievedAt = achievedAt;
         }
+        public WinnerRecord(string name, long time, DateTime achievedAt)
+        {
+            Name = name;
+            Time = TimeSpan.FromMilliseconds(time);
+            AchievedAt = achievedAt;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RestAPI.Database;
+using RestAPI.DTO;
 using RestAPI.Models;
 
 namespace RestAPI.Services
@@ -8,7 +9,7 @@ namespace RestAPI.Services
         private readonly AppDbContext _Context;
         public WinnerRecordService(AppDbContext context) =>
             _Context = context;
-        public WinnerRecord CreateRecord(WinnerRecord request) =>
+        public WinnerRecord CreateRecord(CreateWinnerRecordDto request) =>
             _Context.WinnerRecords.Add(
                 new WinnerRecord(request.Name, request.Time, request.AchievedAt)
             ).Entity is WinnerRecord record

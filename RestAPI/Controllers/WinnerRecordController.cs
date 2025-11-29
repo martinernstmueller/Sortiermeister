@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RestAPI.DTO;
 using RestAPI.Models;
 using RestAPI.Services;
 using RestAPI.Utilities;
@@ -14,7 +15,7 @@ namespace RestAPI.Controllers
             _Service = service;
 
         [HttpPost]
-        public IActionResult CreateWinnerRecord([FromBody] WinnerRecord request)
+        public IActionResult CreateWinnerRecord([FromBody] CreateWinnerRecordDto request)
         {
             try
             {

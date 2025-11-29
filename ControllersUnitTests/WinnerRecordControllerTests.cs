@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RestAPI.Controllers;
+using RestAPI.DTO;
 using RestAPI.Models;
 using RestAPI.Services;
 
@@ -15,6 +16,10 @@ namespace ControllersUnitTests
         {
             return new WinnerRecord(name, time ?? TimeSpan.FromSeconds(120), achievedAt ?? DateTime.UtcNow);
         }
+        private CreateWinnerRecordDto CreateTestDto(string name = "TestName", long? timeMs = null, DateTime? achievedAt = null)
+        {
+            return new CreateWinnerRecordDto(name, timeMs ?? 120000, achievedAt ?? DateTime.UtcNow);
+        }
         [SetUp]
         public void Setup()
         {
@@ -24,9 +29,12 @@ namespace ControllersUnitTests
         [Test]
         public void CreateWinnerRecord_ValidRequest_ReturnsCreatedAtRoute()
         {
-            var testRecord = CreateTestRecord();
-            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<WinnerRecord>())).Returns(testRecord);
-            var result = _Controller.CreateWinnerRecord(testRecord);
+            var testDto = CreateTestDto();
+            var testRecord = CreateTestRecord(testDto.Name, TimeSpan.FromMilliseconds(testDto.Time), testDto.AchievedAt);
+            
+            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<CreateWinnerRecordDto>())).Returns(testRecord);
+            
+            var result = _Controller.CreateWinnerRecord(testDto);
             var createdResult = result as CreatedAtRouteResult;
             Assert.IsNotNull(createdResult);
             Assert.Multiple(() =>
@@ -34,20 +42,41 @@ namespace ControllersUnitTests
                 Assert.That(createdResult.RouteName, Is.EqualTo("GetWinner"));
                 Assert.That(createdResult.Value, Is.TypeOf<WinnerRecord>());
                 var returnedRecord = (WinnerRecord)createdResult.Value!;
-                Assert.That(returnedRecord.Name, Is.EqualTo(testRecord.Name));
-                Assert.That(returnedRecord.Time, Is.EqualTo(testRecord.Time));
-                Assert.That(returnedRecord.AchievedAt, Is.EqualTo(testRecord.AchievedAt));
+                Assert.That(returnedRecord.Name, Is.EqualTo(testDto.Name));
+                Assert.That(returnedRecord.Time, Is.EqualTo(TimeSpan.FromMilliseconds(testDto.Time)));
+                Assert.That(returnedRecord.AchievedAt, Is.EqualTo(testDto.AchievedAt));
             });
         }
         [Test]
         public void CreateWinnerRecord_InvalidRequest_ReturnsBadRequest()
         {
-            var invalidRecord = CreateTestRecord(null);
-            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<WinnerRecord>()))
+            var invalidDto = CreateTestDto(null);
+            
+            _ServiceMock.Setup(s => s.CreateRecord(It.IsAny<CreateWinnerRecordDto>()))
                 .Throws(new ArgumentException("Invalid record"));
-            var result = _Controller.CreateWinnerRecord(invalidRecord);
+            
+            var result = _Controller.CreateWinnerRecord(invalidDto);
             Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
         }
+
+        [Test]
+        public void CreateWinnerRecord_ValidatesTimeInMilliseconds()
+        {
+            var dtoWith90Seconds = CreateTestDto("Player1", 90000); // 90 seconds in milliseconds
+            var expectedRecord = CreateTestRecord("Player1", TimeSpan.FromSeconds(90));
+            
+            _ServiceMock.Setup(s => s.CreateRecord(It.Is<CreateWinnerRecordDto>(dto => 
+                dto.Name == "Player1" && dto.Time == 90000)))
+                .Returns(expectedRecord);
+            
+            var result = _Controller.CreateWinnerRecord(dtoWith90Seconds);
+            var createdResult = result as CreatedAtRouteResult;
+            
+            Assert.IsNotNull(createdResult);
+            var returnedRecord = (WinnerRecord)createdResult.Value!;
+            Assert.That(returnedRecord.Time.TotalSeconds, Is.EqualTo(90));
+        }
+
         [Test]
         public void GetRecord_ValidID_ReturnsOkWithRecord()
         {
