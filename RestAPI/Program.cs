@@ -20,7 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("ConnectionSqlite")));
 
-builder.Services.AddScoped<WinnerRecordService>();
+builder.Services.AddScoped<IWinnerRecordService, WinnerRecordService>();
 
 var app = builder.Build();
 
@@ -37,7 +37,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseStaticFiles();

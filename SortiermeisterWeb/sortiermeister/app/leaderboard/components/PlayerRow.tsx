@@ -1,16 +1,23 @@
 type PlayerRowProps = {
     rank: number;
     name: string;
-    time: string;
+    time: number;
+    achievedAt: Date;
 };
-
-export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
+function formatDate(date: Date): string {
+    return date.toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+export default function PlayerRow({ rank, name, time, achievedAt } : PlayerRowProps) {
     const getRankStyle = () => {
         if (rank === 1) {
             return {
                 gradient: "bg-gradient-to-r from-yellow-600/30 to-yellow-500/30",
                 border: "border-yellow-500/50",
-                icon: "??"
+                icon: "?"
             };
         } else if (rank === 2) {
             return {
@@ -22,7 +29,7 @@ export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
             return {
                 gradient: "bg-gradient-to-r from-orange-600/30 to-orange-500/30",
                 border: "border-orange-500/50",
-                icon: "??"
+                icon: "???"
             };
         }
         return {
@@ -56,6 +63,10 @@ export default function PlayerRow({ rank, name, time } : PlayerRowProps) {
                 
                 <div className="font-mono text-sm text-zinc-300 text-right">
                     {time}
+                </div>
+
+                <div className="font-semibold text-lg text-white truncate">
+                    {formatDate(achievedAt)}
                 </div>
             </div>
         </div>
